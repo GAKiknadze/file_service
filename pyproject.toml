@@ -11,9 +11,10 @@ python = "^3.10"
 fastapi = {extras = ["standard"], version = "^0.115.12"}
 python-multipart = "^0.0.20"
 pydantic = "^2.11.3"
-pydantic-settings = "^2.9.1"
+pydantic-settings = {extras = ["yaml"], version = "^2.9.1"}
 sqlalchemy = "^2.0.40"
 aioboto3 = "^14.1.0"
+pyyaml = ">=6.0"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -25,3 +26,11 @@ mypy = "^1.15.0"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poe.tasks]
+isort = "isort ."
+black = "black ."
+format = ["isort", "black"]
+mypy = "mypy ."
+flake = "flake8 ./src --max-line-length=127"
+check = ["mypy", "flake"]

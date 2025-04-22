@@ -1,5 +1,13 @@
+import os
+from typing import Tuple, Type
+
 from pydantic import BaseModel
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import (
+    BaseSettings,
+    PydanticBaseSettingsSource,
+    SettingsConfigDict,
+    YamlConfigSettingsSource,
+)
 
 
 class S3Config(BaseModel):
@@ -17,7 +25,22 @@ class DBConfig(BaseModel):
 
 
 class _Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_prefix="file_service_")
+    model_config = SettingsConfigDict(
+        yaml_file=os.getenv("CONFIG_FILE", "./configs/config.yaml"),
+        yaml_file_encoding="utf-8",
+        extra="ignore",
+    )
+
+    @classmethod
+    def settings_customise_sources(
+        cls,
+        settings_cls: Type[BaseSettings],
+        init_settings: PydanticBaseSettingsSource,
+        env_settings: PydanticBaseSettingsSource,
+        dotenv_settings: PydanticBaseSettingsSource,
+        file_secret_settings: PydanticBaseSettingsSource,
+    ) -> Tuple[PydanticBaseSettingsSource, ...]:
+        return (YamlConfigSettingsSource(settings_cls),)
 
     s3: S3Config
     db: DBConfig
