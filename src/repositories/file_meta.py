@@ -12,6 +12,7 @@ class FileMetaRepository:
     This repository provides methods for interacting with the `FileMetaEntity` table in the database.
     It includes functionality for retrieving, creating, and deleting file metadata records.
     """
+
     @staticmethod
     async def get_list(
         db: AsyncSession,
@@ -55,7 +56,12 @@ class FileMetaRepository:
 
     @staticmethod
     async def create(
-        db: AsyncSession, internal_id: str, owner_id: UUID, title: str, size: int = 0, format: str = None
+        db: AsyncSession,
+        internal_id: str,
+        owner_id: UUID,
+        title: str,
+        size: int = 0,
+        format: str = None,
     ) -> FileMetaEntity:
         """
         Creates a new FileMetaEntity record in the database.
@@ -70,7 +76,13 @@ class FileMetaRepository:
         Returns:
             FileMetaEntity: The newly created FileMetaEntity object.
         """
-        obj = FileMetaEntity(internal_id=internal_id, owner_id=owner_id, title=title, size=size, format=format)
+        obj = FileMetaEntity(
+            internal_id=internal_id,
+            owner_id=owner_id,
+            title=title,
+            size=size,
+            format=format,
+        )
         db.add(obj)
         await db.commit()
         return obj

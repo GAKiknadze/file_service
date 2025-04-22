@@ -1,5 +1,6 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import BaseModel
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
 
 class S3Config(BaseModel):
     path: str
@@ -17,7 +18,7 @@ class DBConfig(BaseModel):
 
 class _Settings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="file_service_")
-    
+
     s3: S3Config
     db: DBConfig
 

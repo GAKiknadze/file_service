@@ -2,10 +2,11 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from .routes import router
-from ..services.file import FileService
 from ..core.config import Config
 from ..core.database import init_engine
+from ..services.file import FileService
+from .routes import router
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -14,6 +15,7 @@ async def lifespan(app: FastAPI):
     FileService().set_chunk_size(Config.s3.chunk_size)
     FileService().set_max_file_size(Config.s3.max_file_size)
     yield
+
 
 app = FastAPI(lifespan=lifespan)
 

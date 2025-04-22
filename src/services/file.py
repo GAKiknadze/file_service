@@ -1,13 +1,14 @@
-from typing import Sequence, Tuple, AsyncGenerator, Any
+from typing import Any, AsyncGenerator, Sequence, Tuple
 from uuid import UUID, uuid4
 
 from aioboto3 import Session
-from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import UploadFile
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..entities.file_meta import FileMetaEntity
 from ..repositories.file_meta import FileMetaRepository
 from ..utils import singleton
+
 
 @singleton
 class FileService:
@@ -22,30 +23,34 @@ class FileService:
     @max_file_size.setter
     def set_max_file_size(self, value: int) -> None:
         self._max_file_size = value
-    
+
     @property
     def chunk_size(self) -> int:
         return self._chunk_size
-    
+
     @chunk_size.setter
     def set_chunk_size(self, value: int) -> None:
         self._chunk_size = value
-    
+
     @property
     def bucket_name(self) -> str:
         return self._bucket_name
-    
+
     @bucket_name.setter
     def set_bucket_name(self, value: str) -> None:
         self._bucket_name = value
 
-    async def upload(self, db: AsyncSession, s3: Session, owner_id: UUID, filename: str, file: UploadFile) -> FileMetaEntity:
+    async def upload(
+        self,
+        db: AsyncSession,
+        s3: Session,
+        owner_id: UUID,
+        filename: str,
+        file: UploadFile,
+    ) -> FileMetaEntity:
         file_id = str(uuid4())
-        mpu = await s3.create_multipart_upload(
-            Bucket=self._bucket_name,
-            Key=file_id
-        )
-        
+        mpu = await s3.create_multipart_upload(Bucket=self._bucket_name, Key=file_id)
+
         upload_id = mpu["UploadId"]
         parts = []
         part_number = 1
@@ -58,46 +63,45 @@ class FileService:
                 file_size += self._chunk_size
                 if self._max_file_size != 0 and file_size > self._max_file_size:
                     raise Exception("File too large")
-                
+
                 part = await s3.upload_part(
                     Bucket=self._bucket_name,
                     Key=file_id,
                     PartNumber=part_number,
                     UploadId=upload_id,
-                    Body=chunk
+                    Body=chunk,
                 )
                 parts.append({"PartNumber": part_number, "ETag": part["ETag"]})
                 part_number += 1
-            
+
             await s3.complete_multipart_upload(
                 Bucket=self._bucket_name,
                 Key=file_id,
                 UploadId=upload_id,
-                MultipartUpload={"Parts": parts}
+                MultipartUpload={"Parts": parts},
             )
         except Exception as e:
             await s3.abort_multipart_upload(
-                Bucket=self._bucket_name,
-                Key=file_id,
-                UploadId=upload_id
+                Bucket=self._bucket_name, Key=file_id, UploadId=upload_id
             )
             raise e
-        
-        return await FileMetaRepository.create(db, file_id, owner_id, filename, size=file_size)
 
-    async def get(self, db: AsyncSession, s3: Session, _id: UUID) -> Tuple[AsyncGenerator[bytes, None], dict[str, Any]]:
+        return await FileMetaRepository.create(
+            db, file_id, owner_id, filename, size=file_size
+        )
+
+    async def get(
+        self, db: AsyncSession, s3: Session, _id: UUID
+    ) -> Tuple[AsyncGenerator[bytes, None], dict[str, Any]]:
         obj = await FileMetaRepository.get_by_id(db, _id)
         if obj.internal_id is None:
             raise Exception("File not found")
-        
+
         try:
-                head = await s3.head_object(
-                    Bucket=self._bucket_name,
-                    Key=obj.internal_id
-                )
+            head = await s3.head_object(Bucket=self._bucket_name, Key=obj.internal_id)
         except s3.exceptions.NoSuchKey:
             raise Exception("File not found")
-        
+
         file_size = head["ContentLength"]
         content_type = head.get("ContentType", "application/octet-stream")
         filename = obj.title
@@ -105,14 +109,13 @@ class FileService:
         headers = {
             "Content-Disposition": f'attachment; filename="{filename}"',
             "Content-Length": str(file_size),
-            "Content-Type": content_type
+            "Content-Type": content_type,
         }
-        
+
         async def chunk_generator():
             try:
                 response = await s3.get_object(
-                    Bucket=self._bucket_name,
-                    Key=obj.internal_id
+                    Bucket=self._bucket_name, Key=obj.internal_id
                 )
                 async with response["Body"] as stream:
                     while True:
@@ -122,7 +125,7 @@ class FileService:
                         yield chunk
             except Exception as e:
                 raise Exception(f"Download error: {str(e)}")
-        
+
         return chunk_generator, headers
 
     async def get_info(self, db: AsyncSession, _id: UUID) -> FileMetaEntity:

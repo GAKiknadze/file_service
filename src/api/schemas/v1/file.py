@@ -11,7 +11,15 @@ class FileResponse(BaseModel):
     size: int
     format: str
     created_at: datetime
+    deleted_at: datetime | None = None
     is_deleted: bool
+
+
+class FileListFilters(BaseModel):
+    owner_id: UUID | None = None
+    show_deleted: bool = False
+    limit: int = 10
+    offset: int = 0
 
 
 class FilesListResponse(BaseModel):
