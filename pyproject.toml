@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "file-service"
 version = "0.1.0"
-description = ""
+description = "Microservice for handling file uploads, storage, and metadata management"
 authors = ["GAKiknadze <gakiknadze@yandex.ru>"]
 license = "MPL-2.0 license"
 readme = "README.md"

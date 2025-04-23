@@ -16,6 +16,8 @@ File Service is a microservice for handling file uploads, storage, and metadata 
 ## Requirements
 
 - Python 3.10+
+- [Poetry](https://python-poetry.org/)
+- [PoeThePoet](https://poethepoet.natn.io/index.html)
 - PostgreSQL 15+
 - Redis
 - MinIO (or other S3-compatible storage)
@@ -29,20 +31,22 @@ git clone https://github.com/GAKiknadze/file_service.git
 cd file_service
 ```
 
-2. Create and activate virtual environment:
+2. Install Poetry:
 ```bash
-python -m venv venv
-source venv/bin/activate  # Linux/MacOS
-# or
-.\venv\Scripts\activate  # Windows
+curl -sSL https://install.python-poetry.org | python3 -
 ```
 
 3. Install dependencies:
 ```bash
-pip install -r requirements.txt
+poetry install
 ```
 
-4. Copy configuration example and adjust settings:
+4. Activate virtual environment:
+```bash
+poetry shell
+```
+
+5. Copy configuration example and adjust settings:
 ```bash
 cp configs/config.example.yaml configs/config.yaml
 ```
@@ -77,18 +81,30 @@ Required environment variables:
 ### Running Tests
 
 ```bash
-pytest
+poe test
 ```
 
-Run tests with coverage:
+### Code Formatting
 ```bash
-pytest --cov=src --cov-report=html
+poe format
 ```
 
 ### Code Style
 
 ```bash
-flake8 src tests
+poe check
+```
+
+### Run Rest Server
+
+```bash
+poe run_dev
+```
+
+### Run Celery Worker
+
+```bash
+poe run_worker
 ```
 
 ## API Documentation
