@@ -16,6 +16,8 @@ services:
             interval: 5s
             timeout: 5s
             retries: 5
+        networks:
+            - file_service_network
 
     minio:
         image: minio/minio:latest
@@ -23,8 +25,8 @@ services:
             MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
             MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
         ports:
-            - "9000:9000"  # API
-            - "9001:9001"  # Console
+            - "9000:9000"
+            - "9001:9001"
         volumes:
             - minio_data:/data
         command: server --console-address ":9001" /data
@@ -33,6 +35,8 @@ services:
             interval: 5s
             timeout: 5s
             retries: 5
+        networks:
+            - file_service_network
 
     redis:
         image: redis:7-alpine
@@ -47,8 +51,50 @@ services:
             interval: 5s
             timeout: 5s
             retries: 5
+        networks:
+            - file_service_network
+
+    api:
+        build: .
+        command: api
+        ports:
+            - "8000:8000"
+        volumes:
+            - ./configs:/app/configs
+        environment:
+            CONFIG_FILE: /app/configs/config.yaml
+        depends_on:
+            postgres:
+                condition: service_healthy
+            minio:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+        networks:
+            - file_service_network
+
+    worker:
+        build: .
+        command: worker
+        volumes:
+            - ./configs:/app/configs
+        environment:
+            CONFIG_FILE: /app/configs/config.yaml
+        depends_on:
+            postgres:
+                condition: service_healthy
+            minio:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+        networks:
+            - file_service_network
 
 volumes:
     postgres_data:
     redis_data:
     minio_data:
+
+networks:
+    file_service_network:
+        driver: bridge

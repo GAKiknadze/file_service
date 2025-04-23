@@ -59,6 +59,32 @@ cp configs/config.example.yaml configs/config.yaml
 
 ## Running with Docker
 
+1. Make the entrypoint script executable:
+
+```bash
+chmod +x entrypoint.sh
+```
+
+2. Build container:
+
+```bash
+docker build -t file-service .
+```
+
+3. Run Rest service:
+
+```bash
+docker run -p 8000:8000 file-service api
+```
+
+4. Run Celery Worker service:
+
+```bash
+docker run file-service worker
+```
+
+## Running with Docker Compose
+
 Start all services using Docker Compose:
 
 ```bash
