@@ -175,3 +175,5 @@ cython_debug/
 
 # Project config
 configs/config.yaml
+
+*.db
