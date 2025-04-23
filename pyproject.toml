@@ -17,8 +17,9 @@ aioboto3 = "^14.1.0"
 pyyaml = ">=6.0"
 asyncpg = "^0.30.0"
 aiosqlite = "^0.21.0"
-celery = "^5.5.1"
+celery = {extras = ["redis"], version = "^5.5.1"}
 asgiref = "^3.8.1"
+loguru = "^0.7.3"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -45,3 +46,5 @@ mypy = "mypy ."
 flake = "flake8 ./src --max-line-length=127"
 check = ["mypy", "flake"]
 test = "pytest --cov=src ./tests -v"
+run_worker = "celery -A src:worker_app worker --pool=prefork --loglevel=info"
+run_dev = "uvicorn src:rest_app --host 0.0.0.0 --port 8000"

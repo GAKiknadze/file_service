@@ -113,7 +113,7 @@ class FileMetaRepository:
         Returns:
             None
         """
-        stmt = update(FileMetaEntity).where(FileMetaEntity.c.id == _id)
+        stmt = update(FileMetaEntity).where(FileMetaEntity.id == _id)
 
         if mark:
             stmt = stmt.values(is_deleted=True)
@@ -121,3 +121,4 @@ class FileMetaRepository:
             stmt = stmt.values(deleted_at=func.now())
 
         await db.execute(stmt)
+        await db.commit()

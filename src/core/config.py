@@ -1,5 +1,5 @@
 import os
-from typing import Tuple, Type
+from typing import Tuple, Type, Literal
 
 from pydantic import BaseModel
 from pydantic_settings import (
@@ -9,6 +9,10 @@ from pydantic_settings import (
     YamlConfigSettingsSource,
 )
 
+class LoggerConfig(BaseModel):
+    level: Literal[
+        "TRACE", "DEBUG", "INFO", "SUCCESS", "WARNING", "ERROR", "CRITICAL"
+    ] = "INFO"
 
 class S3Config(BaseModel):
     path: str
@@ -49,6 +53,7 @@ class _Settings(BaseSettings):
     s3: S3Config
     db: DBConfig
     celery: CeleryConfig
+    logger: LoggerConfig = LoggerConfig()
 
 
 Config = _Settings()
