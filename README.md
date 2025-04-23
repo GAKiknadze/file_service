@@ -36,17 +36,23 @@ cd file_service
 curl -sSL https://install.python-poetry.org | python3 -
 ```
 
-3. Install dependencies:
+3. Install PoeThePoet:
+```bash
+pip install poethepoet # As dependency
+poetry self add 'poethepoet[poetry_plugin]' # As poetry plugin
+```
+
+4. Install dependencies:
 ```bash
 poetry install
 ```
 
-4. Activate virtual environment:
+5. Activate virtual environment:
 ```bash
 poetry shell
 ```
 
-5. Copy configuration example and adjust settings:
+6. Copy configuration example and adjust settings:
 ```bash
 cp configs/config.example.yaml configs/config.yaml
 ```
