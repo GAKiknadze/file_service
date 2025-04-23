@@ -24,6 +24,10 @@ class DBConfig(BaseModel):
     uri: str
 
 
+class CeleryConfig(BaseModel):
+    broker: str
+
+
 class _Settings(BaseSettings):
     model_config = SettingsConfigDict(
         yaml_file=os.getenv("CONFIG_FILE", "./configs/config.yaml"),
@@ -44,6 +48,7 @@ class _Settings(BaseSettings):
 
     s3: S3Config
     db: DBConfig
+    celery: CeleryConfig
 
 
 Config = _Settings()

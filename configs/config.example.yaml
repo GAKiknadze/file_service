@@ -7,5 +7,8 @@ s3:
   chunk_size: 5242880
   max_file_size: 20971520
 
+celery:
+  broker: redis://localhost
+
 db:
   uri: "postgresql+asyncpg://postgres:postgres@localhost:5432/uploader_db"

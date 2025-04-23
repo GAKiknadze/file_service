@@ -1,3 +1,4 @@
+from mimetypes import guess_extension, guess_type
 from typing import Any, AsyncGenerator, Sequence, Tuple
 from urllib.parse import quote
 from uuid import UUID, uuid4
@@ -41,6 +42,17 @@ class FileService:
     def bucket_name(self, value: str) -> None:
         self._bucket_name = value
 
+    @staticmethod
+    def _get_uuid_file_name(file_id: UUID, mime_type: str | None = None) -> str:
+        if not mime_type:
+            return str(file_id)
+
+        if mime_type == "application/octet-stream":
+            extension = ".bin"
+        else:
+            extension = guess_extension(mime_type) or ""
+        return f"{file_id}{extension}"
+
     async def upload(
         self,
         db: AsyncSession,
@@ -49,8 +61,13 @@ class FileService:
         filename: str,
         file: UploadFile,
     ) -> FileMetaEntity:
-        file_id = str(uuid4())
-        mpu = await s3.create_multipart_upload(Bucket=self._bucket_name, Key=file_id)
+        content_type = file.content_type
+        if content_type is None:
+            content_type, _ = guess_type(filename)
+        file_id = self._get_uuid_file_name(uuid4(), content_type)
+        mpu = await s3.create_multipart_upload(
+            Bucket=self._bucket_name, Key=file_id, ContentType=content_type
+        )
 
         upload_id = mpu["UploadId"]
         parts = []
@@ -88,7 +105,7 @@ class FileService:
             raise e
 
         return await FileMetaRepository.create(
-            db, file_id, owner_id, filename, size=file_size
+            db, file_id, owner_id, filename, size=file_size, format=content_type
         )
 
     async def get(
@@ -118,8 +135,9 @@ class FileService:
                 response = await s3.get_object(
                     Bucket=self._bucket_name, Key=obj.internal_id
                 )
-                while file_data := await response["Body"].read(self._chunk_size):
-                    yield file_data
+                async with response["Body"] as stream:
+                    body = await stream.read()
+                    yield body
             except Exception as e:
                 raise Exception(f"Download error: {str(e)}")
 
@@ -167,15 +185,5 @@ class FileService:
             db, limit=limit, offset=offset, owner_id=owner_id, show_deleted=show_deleted
         )
 
-    async def delete(self, db: AsyncSession, _id: UUID) -> None:
-        """
-        Deletes a file metadata entry from the database by its ID.
-
-        Args:
-            db (AsyncSession): The asynchronous database session to use for the operation.
-            _id (UUID): The unique identifier of the file metadata to delete.
-
-        Returns:
-            None
-        """
-        await FileMetaRepository.delete_by_id(db, _id)
+    async def delete(self, db: AsyncSession, _id: UUID, mark: bool = True) -> None:
+        await FileMetaRepository.delete_by_id(db, _id, mark=mark)

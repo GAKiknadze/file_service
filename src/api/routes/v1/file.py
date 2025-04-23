@@ -3,6 +3,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Query, UploadFile
 from fastapi.responses import StreamingResponse
 
+from ....celery.tasks import delete_file_from_s3_task
 from ....core.database import AsyncSession, get_db
 from ....core.s3 import Session, get_s3_session
 from ....services.file import FileService
@@ -61,3 +62,4 @@ async def get_file_info_by_id(
 @router.delete("/{file_id}")
 async def delete_file_by_id(file_id: UUID, db: AsyncSession = Depends(get_db)) -> None:
     await FileService().delete(db, file_id)
+    delete_file_from_s3_task.delay(file_id)

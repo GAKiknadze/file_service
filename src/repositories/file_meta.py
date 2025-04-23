@@ -102,7 +102,7 @@ class FileMetaRepository:
         return await db.get_one(FileMetaEntity, _id)
 
     @staticmethod
-    async def delete_by_id(db: AsyncSession, _id: UUID) -> None:
+    async def delete_by_id(db: AsyncSession, _id: UUID, mark: bool = True) -> None:
         """
         Deletes a file metadata record from the database by its ID.
 
@@ -113,9 +113,11 @@ class FileMetaRepository:
         Returns:
             None
         """
-        stmt = (
-            update(FileMetaEntity)
-            .where(FileMetaEntity.c.id == _id)
-            .values(is_deleted=func.now())
-        )
+        stmt = update(FileMetaEntity).where(FileMetaEntity.c.id == _id)
+
+        if mark:
+            stmt = stmt.values(is_deleted=True)
+        else:
+            stmt = stmt.values(deleted_at=func.now())
+
         await db.execute(stmt)

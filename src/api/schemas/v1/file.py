@@ -2,16 +2,17 @@ from datetime import datetime
 from typing import List
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class FileResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     id: UUID
+    owner_id: UUID | None = None
     title: str
     size: int
     format: str | None = None
     created_at: datetime
-    deleted_at: datetime | None = None
     is_deleted: bool
 
 
