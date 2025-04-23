@@ -1,4 +1,5 @@
 from typing import Any, AsyncGenerator, Sequence, Tuple
+from urllib.parse import quote
 from uuid import UUID, uuid4
 
 from aioboto3 import Session
@@ -21,7 +22,7 @@ class FileService:
         return self._max_file_size
 
     @max_file_size.setter
-    def set_max_file_size(self, value: int) -> None:
+    def max_file_size(self, value: int) -> None:
         self._max_file_size = value
 
     @property
@@ -29,7 +30,7 @@ class FileService:
         return self._chunk_size
 
     @chunk_size.setter
-    def set_chunk_size(self, value: int) -> None:
+    def chunk_size(self, value: int) -> None:
         self._chunk_size = value
 
     @property
@@ -37,7 +38,7 @@ class FileService:
         return self._bucket_name
 
     @bucket_name.setter
-    def set_bucket_name(self, value: str) -> None:
+    def bucket_name(self, value: str) -> None:
         self._bucket_name = value
 
     async def upload(
@@ -107,7 +108,7 @@ class FileService:
         filename = obj.title
 
         headers = {
-            "Content-Disposition": f'attachment; filename="{filename}"',
+            "Content-Disposition": f"attachment; filename*=UTF-8''{quote(filename)}",
             "Content-Length": str(file_size),
             "Content-Type": content_type,
         }
@@ -117,12 +118,8 @@ class FileService:
                 response = await s3.get_object(
                     Bucket=self._bucket_name, Key=obj.internal_id
                 )
-                async with response["Body"] as stream:
-                    while True:
-                        chunk = await stream.read(self._chunk_size)
-                        if not chunk:
-                            break
-                        yield chunk
+                while file_data := await response["Body"].read(self._chunk_size):
+                    yield file_data
             except Exception as e:
                 raise Exception(f"Download error: {str(e)}")
 

@@ -17,7 +17,7 @@ async def init_engine(uri: str) -> None:
     engine = create_async_engine(uri, future=True)
 
 
-@asynccontextmanager
+# @asynccontextmanager
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """Получение сессии базы данных"""
     global engine  # noqa: F824

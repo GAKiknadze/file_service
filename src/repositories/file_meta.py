@@ -43,8 +43,8 @@ class FileMetaRepository:
         if not show_deleted:
             query = query.where(FileMetaEntity.is_deleted.is_(False))
 
-        total_query = query.with_only_columns([FileMetaEntity.id]).order_by(None)
-        total_count = (await db.execute(total_query)).rowcount
+        count_query = select(func.count()).select_from(query.subquery())
+        total_count = (await db.execute(count_query)).scalar()
 
         query = (
             query.order_by(FileMetaEntity.created_at.desc()).limit(limit).offset(offset)

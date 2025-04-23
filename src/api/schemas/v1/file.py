@@ -9,7 +9,7 @@ class FileResponse(BaseModel):
     id: UUID
     title: str
     size: int
-    format: str
+    format: str | None = None
     created_at: datetime
     deleted_at: datetime | None = None
     is_deleted: bool
