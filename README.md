@@ -2,3 +2,114 @@
 
 [![Run tests and upload coverage](https://github.com/GAKiknadze/file_service/actions/workflows/test.yml/badge.svg)](https://github.com/GAKiknadze/file_service/actions/workflows/test.yml)
 [![codecov](https://codecov.io/gh/GAKiknadze/file_service/graph/badge.svg?token=32FBC0EVSN)](https://codecov.io/gh/GAKiknadze/file_service)
+
+File Service is a microservice for handling file uploads, storage, and metadata management.
+
+## Features
+
+- File upload and download
+- Metadata management
+- S3-compatible storage support
+- Async operations with Celery
+- PostgreSQL for metadata storage
+
+## Requirements
+
+- Python 3.10+
+- PostgreSQL 15+
+- Redis
+- MinIO (or other S3-compatible storage)
+- Docker and Docker Compose (optional)
+
+## Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/GAKiknadze/file_service.git
+cd file_service
+```
+
+2. Create and activate virtual environment:
+```bash
+python -m venv venv
+source venv/bin/activate  # Linux/MacOS
+# or
+.\venv\Scripts\activate  # Windows
+```
+
+3. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+4. Copy configuration example and adjust settings:
+```bash
+cp configs/config.example.yaml configs/config.yaml
+```
+
+## Running with Docker
+
+Start all services using Docker Compose:
+
+```bash
+docker-compose up -d
+```
+
+## Manual Setup
+
+1. Configure PostgreSQL database
+2. Set up MinIO or S3 storage
+3. Configure Redis for Celery
+4. Update config.yaml with your settings
+
+## Environment Variables
+
+Required environment variables:
+- `POSTGRES_USER`
+- `POSTGRES_PASSWORD`
+- `POSTGRES_DB`
+- `MINIO_ROOT_USER`
+- `MINIO_ROOT_PASSWORD`
+- `CONFIG_FILE`
+
+## Development
+
+### Running Tests
+
+```bash
+pytest
+```
+
+Run tests with coverage:
+```bash
+pytest --cov=src --cov-report=html
+```
+
+### Code Style
+
+```bash
+flake8 src tests
+```
+
+## API Documentation
+
+The service provides the following endpoints:
+| Method | URL | Description |
+|-|-|-|
+| `GET` | `/api/v1/file` | List files |
+| `POST` | `/api/v1/file` | Upload new file |
+| `GET` | `/api/v1/file/{file_id}` | Download file |
+| `GET` | `/api/v1/file/{file_id}/info` | Get file info |
+| `DELETE` | `/api/v1/file/{file_id}` | Delete file |
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Run tests and linting
+4. Submit a pull request
+
+## License
+
+This project is licensed under the MPL-2.0 license - see the [`LICENSE`](./LICENSE) file for details.
+
