@@ -25,7 +25,6 @@ jobs:
           virtualenvs-in-project: true
           virtualenvs-path: .venv
           installer-parallel: true
-          package-mode: false
 
       - name: Load cached venv
         id: cached-poetry-dependencies
@@ -38,8 +37,8 @@ jobs:
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         run: poetry install --no-interaction --no-root
 
-      - name: Install library
-        run: poetry install --no-interaction --with test
+      - name: Install libraries
+        run: poetry install --no-interaction --no-root --with test
 
       - name: Run tests
         run: poetry run pytest --cov --cov-branch --cov-report=xml
