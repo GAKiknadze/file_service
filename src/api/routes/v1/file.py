@@ -12,7 +12,7 @@ from ...schemas.v1.file import FileListFilters, FileResponse, FilesListResponse
 router = APIRouter(tags=["files"])
 
 
-@router.get("/")
+@router.get("/", response_model=FilesListResponse, status_code=status.HTTP_200_OK)
 async def get_files_list(
     db: AsyncSession = Depends(get_db), filters: FileListFilters = Query()
 ) -> FilesListResponse:
@@ -28,7 +28,7 @@ async def get_files_list(
     )
 
 
-@router.post("/")
+@router.post("/", response_model=FileResponse, status_code=status.HTTP_201_CREATED)
 async def upload_file(
     file: UploadFile,
     owner_id: UUID,
@@ -38,7 +38,7 @@ async def upload_file(
     return await FileService().upload(db, s3, owner_id, file.filename, file)
 
 
-@router.get("/{file_id}")
+@router.get("/{file_id}", response_class=StreamingResponse, status_code=status.HTTP_200_OK)
 async def get_file_by_id(
     file_id: UUID,
     db: AsyncSession = Depends(get_db),
@@ -52,14 +52,14 @@ async def get_file_by_id(
     )
 
 
-@router.get("/{file_id}/info")
+@router.get("/{file_id}/info", response_model=FileResponse, status_code=status.HTTP_200_OK)
 async def get_file_info_by_id(
     file_id: UUID, db: AsyncSession = Depends(get_db)
 ) -> FileResponse:
     return await FileService().get_info(db, file_id)
 
 
-@router.delete("/{file_id}")
+@router.delete("/{file_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_file_by_id(
     file_id: UUID, db: AsyncSession = Depends(get_db)
 ) -> Response:
