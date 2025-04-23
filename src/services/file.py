@@ -112,7 +112,7 @@ class FileService:
         self, db: AsyncSession, s3: Session, _id: UUID
     ) -> Tuple[AsyncGenerator[bytes, None], dict[str, Any]]:
         obj = await FileMetaRepository.get_by_id(db, _id)
-        if obj.internal_id is None:
+        if obj.internal_id is None or obj.is_deleted:
             raise Exception("File not found")
 
         try:
