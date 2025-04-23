@@ -25,4 +25,6 @@ app = FastAPI(lifespan=lifespan)
 
 app.include_router(router, prefix="/api")
 
-app.add_exception_handler(NoResultFound, handle_object_not_found)
+app.add_exception_handler(
+    NoResultFound, handle_object_not_found  # type:ignore[arg-type]
+)

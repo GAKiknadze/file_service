@@ -47,8 +47,8 @@ async def test_create_file_meta_minimal(db: AsyncSession):
     """Test creating a file metadata record with minimal required fields"""
     file = await FileMetaRepository.create(
         db=db,
+        owner_id=uuid4(),
         internal_id="test123",
-        owner_id=None,
         title="minimal.txt",
         size=0,
     )

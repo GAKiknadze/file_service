@@ -24,7 +24,10 @@ async def get_files_list(
         show_deleted=filters.show_deleted,
     )
     return FilesListResponse(
-        data=files, limit=filters.limit, offset=filters.offset, count=count
+        data=files,  # type:ignore[arg-type]
+        limit=filters.limit,
+        offset=filters.offset,
+        count=count,
     )
 
 
@@ -35,10 +38,15 @@ async def upload_file(
     db: AsyncSession = Depends(get_db),
     s3: Session = Depends(get_s3_session),
 ) -> FileResponse:
-    return await FileService().upload(db, s3, owner_id, file.filename, file)
+    obj = await FileService().upload(
+        db, s3, owner_id, file.filename or "unnamed_file", file
+    )  # type:ignore[arg-type]
+    return FileResponse.model_validate(obj)
 
 
-@router.get("/{file_id}", response_class=StreamingResponse, status_code=status.HTTP_200_OK)
+@router.get(
+    "/{file_id}", response_class=StreamingResponse, status_code=status.HTTP_200_OK
+)
 async def get_file_by_id(
     file_id: UUID,
     db: AsyncSession = Depends(get_db),
@@ -52,11 +60,14 @@ async def get_file_by_id(
     )
 
 
-@router.get("/{file_id}/info", response_model=FileResponse, status_code=status.HTTP_200_OK)
+@router.get(
+    "/{file_id}/info", response_model=FileResponse, status_code=status.HTTP_200_OK
+)
 async def get_file_info_by_id(
     file_id: UUID, db: AsyncSession = Depends(get_db)
 ) -> FileResponse:
-    return await FileService().get_info(db, file_id)
+    obj = await FileService().get_info(db, file_id)
+    return FileResponse.model_validate(obj)
 
 
 @router.delete("/{file_id}", status_code=status.HTTP_204_NO_CONTENT)

@@ -1,5 +1,5 @@
 from mimetypes import guess_extension, guess_type
-from typing import Any, AsyncGenerator, Sequence, Tuple
+from typing import Any, Callable, Sequence, Tuple
 from urllib.parse import quote
 from uuid import UUID, uuid4
 
@@ -110,7 +110,7 @@ class FileService:
 
     async def get(
         self, db: AsyncSession, s3: Session, _id: UUID
-    ) -> Tuple[AsyncGenerator[bytes, None], dict[str, Any]]:
+    ) -> Tuple[Callable[[], Any], dict[str, Any]]:
         obj = await FileMetaRepository.get_by_id(db, _id)
         if obj.internal_id is None or obj.is_deleted:
             raise Exception("File not found")

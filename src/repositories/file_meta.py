@@ -44,7 +44,7 @@ class FileMetaRepository:
             query = query.where(FileMetaEntity.is_deleted.is_(False))
 
         count_query = select(func.count()).select_from(query.subquery())
-        total_count = (await db.execute(count_query)).scalar()
+        total_count = (await db.execute(count_query)).scalar() or 0
 
         query = (
             query.order_by(FileMetaEntity.created_at.desc()).limit(limit).offset(offset)
@@ -61,7 +61,7 @@ class FileMetaRepository:
         owner_id: UUID,
         title: str,
         size: int = 0,
-        format: str = None,
+        format: str | None = None,
     ) -> FileMetaEntity:
         """
         Creates a new FileMetaEntity record in the database.
@@ -88,7 +88,7 @@ class FileMetaRepository:
         return obj
 
     @staticmethod
-    async def get_by_id(db: AsyncSession, _id: UUID) -> FileMetaEntity | None:
+    async def get_by_id(db: AsyncSession, _id: UUID) -> FileMetaEntity:
         """
         Retrieve a FileMetaEntity by its unique identifier.
 
