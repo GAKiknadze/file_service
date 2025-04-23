@@ -7,9 +7,7 @@ from ..core.database import init_engine
 from ..core.logger import logger
 
 app = Celery(
-    "file_service_worker",
-    broker=Config.celery.broker,
-    worker_hijack_root_logger=False
+    "file_service_worker", broker=Config.celery.broker, worker_hijack_root_logger=False
 )
 
 

@@ -3,8 +3,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from ..core.config import Config
-from ..core.logger import logger
 from ..core.database import init_engine
+from ..core.logger import logger
 from ..services.file import FileService
 from .exceptions import NoResultFound, handle_object_not_found
 from .routes import router

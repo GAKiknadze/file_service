@@ -1,13 +1,13 @@
-from uuid import UUID
 import traceback
+from uuid import UUID
 
 from asgiref.sync import async_to_sync
 
 from celery import shared_task
 
-from ..core.logger import logger
 from ..core.config import Config
 from ..core.database import get_db
+from ..core.logger import logger
 from ..core.s3 import get_s3_session
 from ..services.file import FileService
 
@@ -20,7 +20,9 @@ async def delete_file_from_s3(file_id: UUID):
                 if not obj.is_deleted:
                     return
 
-                await s3_session.delete_object(Bucket=Config.s3.bucket_name, Key=obj.internal_id)
+                await s3_session.delete_object(
+                    Bucket=Config.s3.bucket_name, Key=obj.internal_id
+                )
                 await FileService().delete(db, file_id, mark=False)
             except Exception:
                 logger.warning(traceback.format_exc())
