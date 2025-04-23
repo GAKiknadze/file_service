@@ -74,13 +74,13 @@ docker build -t file-service .
 3. Run Rest service:
 
 ```bash
-docker run -p 8000:8000 file-service api
+docker run -p 8000:8000 -v $(pwd)/configs/config.yaml:/app/configs/config.yaml file-service api
 ```
 
 4. Run Celery Worker service:
 
 ```bash
-docker run file-service worker
+docker run -v $(pwd)/configs/config.yaml:/app/configs/config.yaml file-service worker
 ```
 
 ## Running with Docker Compose
